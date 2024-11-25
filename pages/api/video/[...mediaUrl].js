@@ -21,7 +21,7 @@ export default function handler(req, res) {
     }
 
     // Check if query parameter `a=audio` exists
-    const urlParams = new URLSearchParams(rawUrl.split('?')[1]);
+    const urlParams = new URLSearchParams(rawUrl.split('?')[1] || "");
     const forceAudio = urlParams.has('a') && urlParams.get('a') === 'audio';
 
     console.log("Raw URL:", rawUrl);
@@ -50,12 +50,16 @@ export default function handler(req, res) {
     // Sanitize URL for safety
     const sanitizedUrl = sanitizeUrl(mediaUrl);
     const filename = sanitizedUrl.split("/").pop();
-    const mimeType = getMimeType(sanitizedUrl);
+    let mimeType = getMimeType(sanitizedUrl);
 
-    // If 'forceAudio' is true, override the MIME type to be treated as audio
-    const isAudio = forceAudio || mimeType.startsWith("audio");
+    // If 'forceAudio' is true, override the MIME type to audio
+    if (forceAudio) {
+      mimeType = "audio/mpeg"; // Set to a common audio MIME type (or adjust based on your needs)
+    }
 
     // Generate the HTML response with either audio or video player
+    const isAudio = forceAudio || mimeType.startsWith("audio");
+
     const html = `
       <!DOCTYPE html>
       <html lang="en">
