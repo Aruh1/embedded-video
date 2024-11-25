@@ -7,12 +7,13 @@ export default function VideoInput() {
     const [embedUrl, setEmbedUrl] = useState(siteUrl);
     const [copyText, setCopyText] = useState("Click to copy");
     const [hasError, setHasError] = useState(false);
+    const [isAudio, setIsAudio] = useState(false);
 
-    const updateLink = (url) => {
+    const updateLink = (url, forceAudio = false) => {
         try {
             if (url) {
                 const decodedUrl = decodeURIComponent(url);
-    
+
                 let fixedUrl = decodedUrl;
                 if (fixedUrl.startsWith("http:/") && !fixedUrl.startsWith("http://")) {
                     fixedUrl = fixedUrl.replace("http:/", "http://");
@@ -20,11 +21,18 @@ export default function VideoInput() {
                 if (fixedUrl.startsWith("https:/") && !fixedUrl.startsWith("https://")) {
                     fixedUrl = fixedUrl.replace("https:/", "https://");
                 }
-    
+
                 new URL(fixedUrl);
-    
+
                 setVideoUrl(fixedUrl);
-                setEmbedUrl(`${siteUrl}/${decodeURIComponent(fixedUrl)}`);
+
+                const embedUrlWithParams = new URL(`${siteUrl}/${decodeURIComponent(fixedUrl)}`);
+                if (forceAudio) {
+                    embedUrlWithParams.searchParams.set("a", "audio");
+                }
+
+                setEmbedUrl(embedUrlWithParams.toString());
+                setIsAudio(forceAudio);
                 setHasError(false);
             } else {
                 setEmbedUrl(siteUrl);
@@ -34,7 +42,7 @@ export default function VideoInput() {
             setHasError(true);
             setEmbedUrl(siteUrl);
         }
-    };    
+    };
 
     const copyToClipboard = async () => {
         try {
@@ -63,13 +71,11 @@ export default function VideoInput() {
                 <input
                     type="url"
                     value={videoUrl}
-                    onChange={(e) => updateLink(e.target.value)}
+                    onChange={e => updateLink(e.target.value)}
                     placeholder="Enter direct video link (MP4, WebM, MOV, etc.)"
                     className={`w-full px-4 py-2 bg-gray-800 border rounded-full text-white
                     focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500
-                    transition-all duration-200 ${
-                        hasError ? "border-red-500" : "border-gray-600"
-                    }`}
+                    transition-all duration-200 ${hasError ? "border-red-500" : "border-gray-600"}`}
                     autoComplete="off"
                     spellCheck="false"
                 />
@@ -91,6 +97,28 @@ export default function VideoInput() {
                     {embedUrl}
                 </p>
                 <p className="text-sm text-gray-600">{copyText}</p>
+            </div>
+
+            {/* Improved Audio Force Toggle */}
+            <div className="flex items-center justify-center space-x-4">
+                <label htmlFor="forceAudio" className="flex items-center cursor-pointer">
+                    <div className="relative">
+                        <input
+                            type="checkbox"
+                            id="forceAudio"
+                            checked={isAudio}
+                            onChange={e => updateLink(videoUrl, e.target.checked)}
+                            className="sr-only"
+                        />
+                        <div className="block w-10 h-6 bg-gray-600 rounded-full"></div>
+                        <div
+                            className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition ${
+                                isAudio ? "translate-x-4" : ""
+                            }`}
+                        ></div>
+                    </div>
+                    <span className="ml-3 text-gray-400">Force Audio Playback</span>
+                </label>
             </div>
         </div>
     );
