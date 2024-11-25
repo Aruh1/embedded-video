@@ -57,5 +57,5 @@ export function sanitizeUrl(url) {
 
 export function getMimeType(url) {
     const extension = url.split(".").pop().toLowerCase();
-    return MIME_TYPES[extension] || "application/octet-stream";
+    return MIME_TYPES[extension] || "video/webm";
 }
