@@ -1,4 +1,14 @@
+import { getMimeType } from "@/utils/validation";
+
 export default function MediaPlayer({ mediaUrl, forceAudio = false }) {
+    if (!mediaUrl) {
+        return (
+            <div className="flex justify-center items-center min-h-screen bg-black text-white">
+                <p>No media URL provided.</p>
+            </div>
+        );
+    }
+
     const filename = mediaUrl.split("/").pop();
     const mimeType = getMimeType(filename);
     const isAudio = forceAudio || mimeType.startsWith("audio");

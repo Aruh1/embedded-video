@@ -8,12 +8,23 @@ export default function VideoInput() {
     const [copyText, setCopyText] = useState("Click to copy");
     const [hasError, setHasError] = useState(false);
 
-    const updateLink = url => {
-        setVideoUrl(url);
+    const updateLink = (url) => {
         try {
             if (url) {
-                new URL(url);
-                setEmbedUrl(`${siteUrl}/${encodeURIComponent(url)}`);
+                const decodedUrl = decodeURIComponent(url);
+    
+                let fixedUrl = decodedUrl;
+                if (fixedUrl.startsWith("http:/") && !fixedUrl.startsWith("http://")) {
+                    fixedUrl = fixedUrl.replace("http:/", "http://");
+                }
+                if (fixedUrl.startsWith("https:/") && !fixedUrl.startsWith("https://")) {
+                    fixedUrl = fixedUrl.replace("https:/", "https://");
+                }
+    
+                new URL(fixedUrl);
+    
+                setVideoUrl(fixedUrl);
+                setEmbedUrl(`${siteUrl}/${decodeURIComponent(fixedUrl)}`);
                 setHasError(false);
             } else {
                 setEmbedUrl(siteUrl);
@@ -23,7 +34,7 @@ export default function VideoInput() {
             setHasError(true);
             setEmbedUrl(siteUrl);
         }
-    };
+    };    
 
     const copyToClipboard = async () => {
         try {
@@ -39,7 +50,6 @@ export default function VideoInput() {
     const pasteFromClipboard = async () => {
         try {
             const text = await navigator.clipboard.readText();
-            setVideoUrl(text);
             updateLink(text);
         } catch (err) {
             console.error("Failed to paste:", err);
@@ -53,11 +63,13 @@ export default function VideoInput() {
                 <input
                     type="url"
                     value={videoUrl}
-                    onChange={e => updateLink(e.target.value)}
+                    onChange={(e) => updateLink(e.target.value)}
                     placeholder="Enter direct video link (MP4, WebM, MOV, etc.)"
-                    className={`w-full px-4 py-2 bg-gray-800 border rounded-full text-white 
-            focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500
-            transition-all duration-200 ${hasError ? "border-red-500" : "border-gray-600"}`}
+                    className={`w-full px-4 py-2 bg-gray-800 border rounded-full text-white
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500
+                    transition-all duration-200 ${
+                        hasError ? "border-red-500" : "border-gray-600"
+                    }`}
                     autoComplete="off"
                     spellCheck="false"
                 />
@@ -68,6 +80,8 @@ export default function VideoInput() {
                     <ClipboardIcon className="w-5 h-5" />
                 </button>
             </div>
+
+            {hasError && <p className="text-red-500">Invalid URL format.</p>}
 
             <div className="space-y-2">
                 <p

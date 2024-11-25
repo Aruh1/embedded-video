@@ -1,14 +1,11 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-    reactStrictMode: true,
+module.exports = {
     async rewrites() {
         return [
             {
-                source: "/:path*",
-                destination: "/api/video/:path*"
-            }
+                source: '/:path*',
+                destination: '/api/video/:path*', // Ensure it points to the API route
+            },
         ];
-    }
+    },
+    trailingSlash: false,
 };
-
-module.exports = nextConfig;

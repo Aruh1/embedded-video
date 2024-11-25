@@ -1,32 +1,61 @@
-import { isValidUrl, hasValidProtocol, hasValidExtension, sanitizeUrl, getMimeType } from '@/utils/validation';
+import { isValidUrl, hasValidProtocol, hasValidExtension, sanitizeUrl, getMimeType } from "@/utils/validation";
+
+export const config = {
+  api: {
+    externalResolver: true,
+  },
+};
 
 export default function handler(req, res) {
   try {
-    // Mendapatkan mediaUrl yang sudah di-encode dalam query string
-    let { mediaUrl } = req.query;
+    // Get the raw URL from the request
+    const rawUrl = req.url;
 
-    // Mendecode seluruh URL yang diterima
-    const decodedUrl = decodeURIComponent(mediaUrl); // decode URL secara keseluruhan
+    // Extract the media URL by removing the API path and leading slashes
+    let mediaUrl = rawUrl.replace(/^\/api\/video\//, "").replace(/^\//, "");
 
-    // Lakukan validasi URL
-    if (!isValidUrl(decodedUrl)) {
-      return res.status(400).json({ error: 'Invalid URL format.' });
+    // Ensure protocols like `http:/` or `https:/` are fixed
+    if (/^https?:\/[^/]/.test(mediaUrl)) {
+      // Add the missing slash after the protocol
+      mediaUrl = mediaUrl.replace(/^(https?:\/)([^/])/, "$1/$2");
     }
 
-    if (!hasValidProtocol(decodedUrl)) {
-      return res.status(400).json({ error: 'URL must start with https:// or http://' });
+    // Check if query parameter `a=audio` exists
+    const urlParams = new URLSearchParams(rawUrl.split('?')[1]);
+    const forceAudio = urlParams.has('a') && urlParams.get('a') === 'audio';
+
+    console.log("Raw URL:", rawUrl);
+    console.log("Processed URL:", mediaUrl);
+    console.log("Force Audio:", forceAudio);
+
+    // Validate the reconstructed URL
+    if (!isValidUrl(mediaUrl)) {
+      return res.status(400).json({
+        error: "Invalid URL format.",
+        receivedUrl: mediaUrl,
+        rawUrl: rawUrl,
+      });
     }
 
-    if (!hasValidExtension(decodedUrl)) {
-      return res.status(400).json({ error: 'Invalid file type.' });
+    // Ensure that the protocol is valid (http:// or https://)
+    if (!hasValidProtocol(mediaUrl)) {
+      return res.status(400).json({ error: "URL must start with https:// or http://" });
     }
 
-    const sanitizedUrl = sanitizeUrl(decodedUrl);
-    const filename = sanitizedUrl.split('/').pop();
+    // If `forceAudio` is true, bypass the file extension validation
+    if (!forceAudio && !hasValidExtension(mediaUrl)) {
+      return res.status(400).json({ error: "Invalid file type." });
+    }
+
+    // Sanitize URL for safety
+    const sanitizedUrl = sanitizeUrl(mediaUrl);
+    const filename = sanitizedUrl.split("/").pop();
     const mimeType = getMimeType(sanitizedUrl);
-    const isAudio = mimeType.startsWith('audio');
 
-    // Generate HTML response
+    // If 'forceAudio' is true, override the MIME type to be treated as audio
+    const isAudio = forceAudio || mimeType.startsWith("audio");
+
+    // Generate the HTML response with either audio or video player
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -37,7 +66,7 @@ export default function handler(req, res) {
         <meta property="og:video:url" content="${sanitizedUrl}">
         <meta property="og:video:width" content="1920">
         <meta property="og:video:height" content="1080">
-        <title>${isAudio ? 'Audio' : 'Video'} Player - ${filename}</title>
+        <title>${isAudio ? "Audio" : "Video"} Player - ${filename}</title>
         <link rel="shortcut icon" href="https://ptpimg.me/animated_favicon.gif">
         <style>
           body {
@@ -55,25 +84,25 @@ export default function handler(req, res) {
         </style>
       </head>
       <body>
-        ${isAudio ? 
-          `<audio controls autoplay>
-            <source src="${sanitizedUrl}" type="${mimeType}">
-            Your browser does not support audio playback.
-           </audio>`
-         : 
-          `<video controls autoplay>
-            <source src="${sanitizedUrl}" type="${mimeType}">
-            Your browser does not support video playback.
-           </video>`
+        ${
+          isAudio
+            ? `<audio controls autoplay>
+                <source src="${sanitizedUrl}" type="${mimeType}">
+                Your browser does not support audio playback.
+              </audio>`
+            : `<video controls autoplay>
+                <source src="${sanitizedUrl}" type="${mimeType}">
+                Your browser does not support video playback.
+              </video>`
         }
       </body>
       </html>
     `;
 
-    res.setHeader('Content-Type', 'text/html');
+    res.setHeader("Content-Type", "text/html");
     res.status(200).send(html);
   } catch (err) {
-    console.error('Error handling request:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error handling request:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 }

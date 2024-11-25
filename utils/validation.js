@@ -1,17 +1,8 @@
+// utils/validation.js
 export const VALID_EXTENSIONS = [
-    ".mp4", // MPEG-4
-    ".webm", // WebM
-    ".mov", // QuickTime Movie
-    ".flv", // Flash Video
-    ".wmv", // Windows Media Video
-    ".avi", // Audio Video Interleave
-    ".mkv", // Matroska Video
-    ".mpeg", // MPEG Video
-    ".mpg", // MPEG Video (alternative extension)
-    ".3gp", // 3GPP Multimedia
-    ".mp3",
-    ".wav",
-    ".ogg"
+    ".mp4", ".webm", ".mov", ".flv", ".wmv", 
+    ".avi", ".mkv", ".mpeg", ".mpg", ".3gp", 
+    ".mp3", ".wav", ".ogg"
 ];
 
 export const ALLOWED_PROTOCOLS = ["https://", "http://"];
@@ -32,21 +23,32 @@ export const MIME_TYPES = {
     ogg: "audio/ogg"
 };
 
-export function isValidUrl(url) {
-    try {
-        new URL(url);
-        return true;
-    } catch {
-        return false;
+export function isValidUrl(string) {
+  try {
+    // Ensure proper protocol format
+    let urlToTest = string;
+    if (urlToTest.startsWith('http:/') && !urlToTest.startsWith('http://')) {
+      urlToTest = urlToTest.replace('http:/', 'http://');
     }
+    if (urlToTest.startsWith('https:/') && !urlToTest.startsWith('https://')) {
+      urlToTest = urlToTest.replace('https:/', 'https://');
+    }
+    
+    const url = new URL(urlToTest);
+    return ['http:', 'https:'].includes(url.protocol);
+  } catch (err) {
+    console.error('URL validation error:', err);
+    return false;
+  }
+}
+
+// Keep only this version of hasValidProtocol
+export function hasValidProtocol(url) {
+    return ALLOWED_PROTOCOLS.some(protocol => url.toLowerCase().startsWith(protocol));
 }
 
 export function hasValidExtension(url) {
     return VALID_EXTENSIONS.some(ext => url.toLowerCase().endsWith(ext));
-}
-
-export function hasValidProtocol(url) {
-    return ALLOWED_PROTOCOLS.some(protocol => url.toLowerCase().startsWith(protocol));
 }
 
 export function sanitizeUrl(url) {
