@@ -1,0 +1,28 @@
+import Head from "next/head";
+import VideoInput from "@/components/VideoInput";
+import { MonitorPlay } from "lucide-react";
+import { siteUrl } from "@/utils/config";
+
+export default function Home() {
+    return (
+        <>
+            <Head>
+                <title>Embedded Video</title>
+                <meta name="description" content="Embed large video files on Discord" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <link rel="shortcut icon" type="image/x-icon" href="https://ptpimg.me/animated_favicon.gif" />
+                <meta property="og:title" content="Embedded Video" />
+                <meta property="og:description" content="Embed large video files on Discord" />
+                <meta property="og:url" content={siteUrl} />
+            </Head>
+            <main className="bg-black flex items-center justify-center min-h-screen text-white">
+                <div className="text-center space-y-6 p-4 max-w-2xl w-full">
+                    <MonitorPlay className="mx-auto w-16 h-16 text-gray-300" />
+                    <h1 className="text-2xl font-semibold">Embedded Video</h1>
+                    <p className="text-gray-400">A service to embed files bigger than 50MB on Discord.</p>
+                    <VideoInput />
+                </div>
+            </main>
+        </>
+    );
+}
