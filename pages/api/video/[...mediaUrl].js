@@ -49,6 +49,10 @@ export default async function handler(req, res) {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="video.other">
+        <meta property="og:video:url" content="${sanitizedUrl}">
+        <meta property="og:video:width" content="1920">
+        <meta property="og:video:height" content="1080">
         <title>${isAudio ? "Audio" : "Video"} Player - ${filename}</title>
         <link rel="shortcut icon" href="https://ptpimg.me/animated_favicon.gif">
         <style>
