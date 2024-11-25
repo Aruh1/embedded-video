@@ -11,8 +11,11 @@ export default function Home() {
                 <meta name="description" content="Embed large video files on Discord" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="shortcut icon" type="image/x-icon" href="https://ptpimg.me/animated_favicon.gif" />
+                <meta property="og:site_name" content="Embedded Video"></meta>
                 <meta property="og:title" content="Embedded Video" />
                 <meta property="og:description" content="Embed large video files on Discord" />
+                <meta property="og:type" content="website" />
+                <meta property="og:image" itemprop="image" content="https://github.com/user-attachments/assets/ab678426-8ceb-49e1-b79c-c5535ff5be7c"></meta>
                 <meta property="og:url" content={siteUrl} />
             </Head>
             <main className="bg-black flex items-center justify-center min-h-screen text-white">
