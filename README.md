@@ -19,7 +19,7 @@ To start developing locally, follow these steps:
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your-username/embedded-video.git
+    git clone https://github.com/Aruh1/embedded-video.git
     cd embedded-video
     ```
 2. Install dependencies:
