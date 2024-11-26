@@ -15,7 +15,10 @@ export default function Home() {
                 <meta property="og:title" content="Embedded Video" />
                 <meta property="og:description" content="Embed large video files on Discord" />
                 <meta property="og:type" content="website" />
-                <meta property="og:image" content="https://github.com/user-attachments/assets/ab678426-8ceb-49e1-b79c-c5535ff5be7c"></meta>
+                <meta
+                    property="og:image"
+                    content="https://github.com/user-attachments/assets/ab678426-8ceb-49e1-b79c-c5535ff5be7c"
+                ></meta>
                 <meta name="theme-color" content="#23272A"></meta>
                 <meta property="og:url" content={siteUrl} />
             </Head>
