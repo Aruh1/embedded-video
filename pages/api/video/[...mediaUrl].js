@@ -1,6 +1,7 @@
 import { isValidUrl, hasValidExtension, sanitizeUrl, getMimeType } from "@/utils/validation";
-import MediaPlayer from "@/components/MediaPlayer";
 import { renderToString } from "react-dom/server";
+import Head from "next/head";
+import MediaPlayer from "@/components/MediaPlayer";
 
 export const config = {
     api: {
@@ -64,7 +65,7 @@ export default async function handler(req, res) {
 
         const htmlContent = renderToString(
             <html lang="en">
-                <head>
+                <Head>
                     <meta charSet="UTF-8" />
                     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                     <meta property="og:type" content="video.other" />
@@ -73,7 +74,7 @@ export default async function handler(req, res) {
                     <meta property="og:video:height" content="1080" />
                     <title>{title}</title>
                     <link rel="icon" href="/animated_favicon.gif" type="image/gif" />
-                </head>
+                </Head>
                 <body>
                     <MediaPlayer url={sanitizedUrl} ifType={mimeType} ifAudio={isAudio} />
                 </body>
