@@ -41,15 +41,19 @@ export default function Footer() {
                             />
                         </svg>
                     </a>
-                    <Image
-                        src="https://uptime.betterstack.com/status-badges/v1/monitor/1ogdv.svg"
-                        alt="Uptime Status"
+                    <a
                         href="https://status.pololer.web.id/"
                         target="_blank"
-                        height={4}
-                        width={65}
                         className="hover:text-gray-200 transition-colors duration-300"
-                    />
+                        rel="noopener noreferrer"
+                    >
+                        <Image
+                            src="https://uptime.betterstack.com/status-badges/v1/monitor/1ogdv.svg"
+                            alt="Uptime Status"
+                            height={4}
+                            width={65}
+                        />
+                    </a>
                 </div>
                 <div className="flex items-center space-x-6 animate-slideInRight">
                     <div className="group relative">
