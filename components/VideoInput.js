@@ -162,6 +162,18 @@ export default function VideoInput() {
                                 />
                             </svg>
                         </a>
+                        <a
+                            href="https://status.pololer.web.id/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-gray-200 transition-colors duration-300"
+                        >
+                            <img
+                                src="https://uptime.betterstack.com/status-badges/v1/monitor/1ogdv.svg"
+                                alt="Uptime Status"
+                                className="h-4"
+                            />
+                        </a>
                     </div>
                     <div className="flex items-center space-x-6 animate-slideInRight">
                         <div className="group relative">
