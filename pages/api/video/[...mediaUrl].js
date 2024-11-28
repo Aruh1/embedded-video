@@ -39,9 +39,9 @@ export default async function handler(req, res) {
 
         const sanitizedUrl = sanitizeUrl(validatedUrl);
         const filename = sanitizedUrl.split("/").pop() || "media";
-        let mimeType = getMimeType(sanitizedUrl, forceAudio);
-
+        const mimeType = getMimeType(sanitizedUrl, forceAudio);
         const isAudio = forceAudio || mimeType.startsWith("audio");
+        const MediaTag = isAudio ? "audio" : "video";
 
         const html = `
       <!DOCTYPE html>
@@ -73,17 +73,10 @@ export default async function handler(req, res) {
         </style>
       </head>
       <body>
-        ${
-            isAudio
-                ? `<audio controls autoplay>
-                <source src="${sanitizedUrl}" type="${mimeType}">
-                Your browser does not support audio playback.
-              </audio>`
-                : `<video controls autoplay>
-                <source src="${sanitizedUrl}" type="${mimeType}">
-                Your browser does not support video playback.
-              </video>`
-        }
+        <${MediaTag} controls="true" autoPlay="true" className="max-w-full max-h-full">
+          <source src="${sanitizedUrl}" type="${mimeType}" />
+          Your browser does not support ${isAudio ? "audio" : "video"} playback.
+        </${MediaTag}>
       </body>
       </html>
     `;

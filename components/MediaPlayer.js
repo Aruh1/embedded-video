@@ -1,31 +1,26 @@
-import { getMimeType } from "@/utils/validation";
+import React from "react";
+import PropTypes from "prop-types";
 
-export default function MediaPlayer({ mediaUrl, forceAudio = false }) {
-    if (!mediaUrl) {
-        return (
-            <div className="flex justify-center items-center min-h-screen bg-black text-white">
-                <p>No media URL provided.</p>
-            </div>
-        );
-    }
-
-    const filename = mediaUrl.split("/").pop();
-    const mimeType = getMimeType(filename);
-    const isAudio = forceAudio || mimeType.startsWith("audio");
+const MediaPlayer = ({ src, type, filename = "media", autoPlay = true, controls = true }) => {
+    const isAudio = type.startsWith("audio/");
+    const MediaTag = isAudio ? "audio" : "video";
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-black">
-            {isAudio ? (
-                <audio controls autoPlay className="max-w-full">
-                    <source src={mediaUrl} type={mimeType} />
-                    Your browser does not support audio playback.
-                </audio>
-            ) : (
-                <video controls autoPlay className="max-w-full max-h-screen">
-                    <source src={mediaUrl} type={mimeType} />
-                    Your browser does not support video playback.
-                </video>
-            )}
+        <div className="media-player-container">
+            <MediaTag controls={controls} autoPlay={autoPlay} className="max-w-full max-h-full">
+                <source src={src} type={type} />
+                Your browser does not support {isAudio ? "audio" : "video"} playback.
+            </MediaTag>
         </div>
     );
-}
+};
+
+MediaPlayer.propTypes = {
+    src: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+    filename: PropTypes.string,
+    autoPlay: PropTypes.bool,
+    controls: PropTypes.bool
+};
+
+export default MediaPlayer;
