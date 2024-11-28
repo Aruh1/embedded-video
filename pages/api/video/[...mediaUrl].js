@@ -1,4 +1,6 @@
-import { isValidUrl, hasValidProtocol, hasValidExtension, sanitizeUrl, getMimeType } from "@/utils/validation";
+import { isValidUrl, hasValidExtension, sanitizeUrl, getMimeType } from "@/utils/validation";
+import MediaPlayer from "@/components/MediaPlayer";
+import { renderToString } from "react-dom/server";
 
 export const config = {
     api: {
@@ -9,11 +11,28 @@ export const config = {
 
 export default async function handler(req, res) {
     try {
+        if (req.method !== "GET") {
+            return res.status(405).json({ error: "Method not allowed" });
+        }
+
         const rawUrl = req.url;
+        if (!rawUrl) {
+            return res.status(400).json({ error: "URL is required" });
+        }
+
         let mediaUrl = rawUrl.replace(/^\/api\/video\//, "").replace(/^\//, "");
 
         // Parse the URL to handle existing query parameters
-        const parsedUrl = new URL(mediaUrl, "https://dummy.com");
+        let parsedUrl;
+        try {
+            parsedUrl = new URL(mediaUrl, "https://dummy.com");
+        } catch (error) {
+            return res.status(400).json({
+                error: "Invalid URL format",
+                receivedUrl: mediaUrl
+            });
+        }
+
         const forceAudio = parsedUrl.searchParams.get("a") === "audio";
 
         // Reconstruct the original URL without our custom parameter
@@ -41,53 +60,33 @@ export default async function handler(req, res) {
         const filename = sanitizedUrl.split("/").pop() || "media";
         const mimeType = getMimeType(sanitizedUrl, forceAudio);
         const isAudio = forceAudio || mimeType.startsWith("audio");
-        const MediaTag = isAudio ? "audio" : "video";
+        const title = `${isAudio ? "Audio" : "Video"} Player - ${filename}`;
 
-        const html = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta property="og:type" content="video.other">
-        <meta property="og:video:url" content="${sanitizedUrl}">
-        <meta property="og:video:width" content="1920">
-        <meta property="og:video:height" content="1080">
-        <title>${isAudio ? "Audio" : "Video"} Player - ${filename}</title>
-        <link rel="shortcut icon" href="https://ptpimg.me/animated_favicon.gif">
-        <style>
-          body {
-            margin: 0;
-            background-color: black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-          }
-          video, audio {
-            max-width: 100vw;
-            max-height: 100vh;
-            outline: none;
-          }
-        </style>
-      </head>
-      <body>
-        <${MediaTag} controls="true" autoPlay="true" className="max-w-full max-h-full">
-          <source src="${sanitizedUrl}" type="${mimeType}" />
-          Your browser does not support ${isAudio ? "audio" : "video"} playback.
-        </${MediaTag}>
-      </body>
-      </html>
-    `;
+        const htmlContent = renderToString(
+            <html lang="en">
+                <head>
+                    <meta charSet="UTF-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                    <meta property="og:type" content="video.other" />
+                    <meta property="og:video:url" content={sanitizedUrl} />
+                    <meta property="og:video:width" content="1920" />
+                    <meta property="og:video:height" content="1080" />
+                    <title>{title}</title>
+                    <link rel="icon" href="/animated_favicon.gif" type="image/gif" />
+                </head>
+                <body>
+                    <MediaPlayer url={sanitizedUrl} ifType={mimeType} ifAudio={isAudio} />
+                </body>
+            </html>
+        );
 
-        res.setHeader("Content-Type", "text/html");
-        res.status(200).send(html);
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.status(200).send(`<!DOCTYPE html>${htmlContent}`);
     } catch (err) {
         console.error("Error handling request:", err);
         res.status(500).json({
             error: "Internal server error",
-            details: err.message
+            details: process.env.NODE_ENV === "development" ? err.message : undefined
         });
     }
 }

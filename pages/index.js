@@ -10,7 +10,7 @@ export default function Home() {
                 <title>Embedded Video</title>
                 <meta name="description" content="Embed large video files on Discord" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <link rel="shortcut icon" type="image/x-icon" href="https://ptpimg.me/animated_favicon.gif" />
+                <link rel="icon" type="image/x-icon" href="/animated_favicon.gif" />
                 <meta property="og:site_name" content="Embedded Video"></meta>
                 <meta property="og:title" content="Embedded Video" />
                 <meta property="og:description" content="Embed large video files on Discord" />
