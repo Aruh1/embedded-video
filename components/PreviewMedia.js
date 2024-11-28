@@ -48,17 +48,6 @@ export function PreviewMedia({ url, forceAudio = false }) {
         validateUrl();
     }, [url]);
 
-    const togglePlayback = () => {
-        if (mediaRef.current) {
-            if (isPlaying) {
-                mediaRef.current.pause();
-            } else {
-                mediaRef.current.play();
-            }
-            setIsPlaying(!isPlaying);
-        }
-    };
-
     // Determine media type
     const mediaType = isValid ? getMimeType(url, forceAudio) : "";
     const isAudioMedia = mediaType.startsWith("audio/");
@@ -91,9 +80,27 @@ export function PreviewMedia({ url, forceAudio = false }) {
     return (
         <div className="w-full max-w-md mx-auto mt-2">
             {isAudioMedia ? (
-                <audio ref={mediaRef} src={url} className="w-full" preload="metadata" type={mediaType} controls />
+                <audio
+                    ref={mediaRef}
+                    src={url}
+                    className="w-full"
+                    preload="metadata"
+                    type={mediaType}
+                    controls
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                />
             ) : (
-                <video ref={mediaRef} src={url} className="w-full" preload="metadata" type={mediaType} controls />
+                <video
+                    ref={mediaRef}
+                    src={url}
+                    className="w-full"
+                    preload="metadata"
+                    type={mediaType}
+                    controls
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                />
             )}
         </div>
     );
