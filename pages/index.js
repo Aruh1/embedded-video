@@ -2,6 +2,7 @@ import Head from "next/head";
 import VideoInput from "@/components/VideoInput";
 import { MonitorPlay } from "lucide-react";
 import { siteUrl } from "@/utils/config";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function Home() {
     return (
@@ -28,6 +29,7 @@ export default function Home() {
                     <h1 className="text-2xl font-semibold">Embedded Video</h1>
                     <p className="text-gray-400">A service to embed files bigger than 50MB on Discord.</p>
                     <VideoInput />
+                    <Analytics />
                 </div>
             </main>
         </>

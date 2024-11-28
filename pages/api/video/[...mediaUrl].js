@@ -2,6 +2,7 @@ import { isValidUrl, hasValidExtension, sanitizeUrl, getMimeType } from "@/utils
 import { renderToString } from "react-dom/server";
 import Head from "next/head";
 import MediaPlayer from "@/components/MediaPlayer";
+import { Analytics } from "@vercel/analytics/react"
 
 export const config = {
     api: {
@@ -77,6 +78,7 @@ export default async function handler(req, res) {
                 </Head>
                 <body>
                     <MediaPlayer url={sanitizedUrl} ifType={mimeType} ifAudio={isAudio} />
+                    <Analytics />
                 </body>
             </html>
         );
