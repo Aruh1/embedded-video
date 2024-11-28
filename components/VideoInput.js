@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ClipboardIcon, Github, Coffee, Icon } from "lucide-react";
 import { siteUrl } from "@/utils/config";
 import { mugTeabag } from "@lucide/lab";
+import { PreviewMedia } from "./PreviewMedia.js";
 
 export default function VideoInput() {
     const [videoUrl, setVideoUrl] = useState("");
@@ -139,6 +140,12 @@ export default function VideoInput() {
                     <span className="ml-3 text-gray-400">Force Audio Playback</span>
                 </label>
             </div>
+
+            {/* Improved Preview Media */}
+            <div className="space-y-2">
+                <PreviewMedia url={videoUrl} forceAudio={isAudio} />
+            </div>
+
             <footer className="fixed bottom-0 left-0 right-0 p-4 bg-gray-900/80 backdrop-blur-sm border-t border-gray-800 animate-fadeIn">
                 <div className="container mx-auto flex flex-col md:flex-row items-center justify-between text-gray-400 text-sm gap-4">
                     <div className="flex items-center space-x-4 animate-slideInLeft">
