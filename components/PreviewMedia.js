@@ -50,7 +50,8 @@ export function PreviewMedia({ url, forceAudio = false }) {
 
     // Determine media type
     const mediaType = isValid ? getMimeType(url, forceAudio) : "";
-    const isAudioMedia = mediaType.startsWith("audio/");
+    const isAudioMedia = mediaType.startsWith("audio");
+    const MediaTag = isAudioMedia ? "audio" : "video";
 
     useEffect(() => {
         const currentMedia = mediaRef.current;
@@ -79,29 +80,16 @@ export function PreviewMedia({ url, forceAudio = false }) {
 
     return (
         <div className="w-full max-w-md mx-auto mt-2">
-            {isAudioMedia ? (
-                <audio
-                    ref={mediaRef}
-                    src={url}
-                    className="w-full"
-                    preload="metadata"
-                    type={mediaType}
-                    controls
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                />
-            ) : (
-                <video
-                    ref={mediaRef}
-                    src={url}
-                    className="w-full"
-                    preload="metadata"
-                    type={mediaType}
-                    controls
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                />
-            )}
+            <MediaTag
+                ref={mediaRef}
+                src={url}
+                className="w-full"
+                preload="metadata"
+                type={mediaType}
+                controls
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+            />
         </div>
     );
 }
