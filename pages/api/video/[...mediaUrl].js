@@ -1,5 +1,4 @@
 import { isValidUrl, hasValidExtension, sanitizeUrl, getMimeType } from "@/utils/validation";
-import { Analytics } from "@vercel/analytics/react"
 
 
 export const config = {
@@ -57,7 +56,6 @@ export default async function handler(req, res) {
         <meta property="og:video:height" content="1080">
         <title>${isAudio ? "Audio" : "Video"} Player - ${filename}</title>
         <link rel="shortcut icon" href="https://ptpimg.me/animated_favicon.gif">
-        <${Analytics} />
         <style>
           body {
             margin: 0;
