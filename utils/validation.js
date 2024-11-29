@@ -11,7 +11,8 @@ export const VALID_EXTENSIONS = [
     ".3gp",
     ".mp3",
     ".wav",
-    ".ogg"
+    ".ogg",
+    ".flac"
 ];
 export const ALLOWED_PROTOCOLS = ["https://", "http://"];
 
@@ -56,7 +57,9 @@ export function getMimeType(url, forceAudio = false) {
         "3gp": "video/3gpp",
         mp3: "audio/mpeg",
         wav: "audio/wav",
-        ogg: forceAudio ? "audio/ogg" : "video/ogg"
+        ogg: forceAudio ? "audio/ogg" : "video/ogg",
+        flac: "audio/flac",
+        mp3: "audio/mpeg",
     };
     return mimeTypes[extension] || (forceAudio ? "audio/mpeg" : "application/octet-stream");
 }

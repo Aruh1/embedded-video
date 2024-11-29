@@ -22,6 +22,7 @@ export default function Home() {
                 ></meta>
                 <meta name="theme-color" content="#23272A"></meta>
                 <meta property="og:url" content={siteUrl} />
+                <Analytics />
             </Head>
             <main className="bg-black flex items-center justify-center min-h-screen text-white">
                 <div className="text-center space-y-6 p-4 max-w-2xl w-full">
@@ -29,7 +30,6 @@ export default function Home() {
                     <h1 className="text-2xl font-semibold">Embedded Video</h1>
                     <p className="text-gray-400">A service to embed files bigger than 50MB on Discord.</p>
                     <VideoInput />
-                    <Analytics />
                 </div>
             </main>
         </>

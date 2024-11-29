@@ -1,47 +1,26 @@
-import React, { useRef } from "react";
+import React from "react";
+import PropTypes from "prop-types";
 
-export function MediaPlayer({ url, ifType, ifAudio = false }) {
-    const MediaTag = ifAudio ? "audio" : "video";
-    const mediaRef = useRef(null);
+const MediaPlayer = ({ src, type, filename = "media", autoPlay = true, controls = true }) => {
+    const isAudio = type.startsWith("audio/");
+    const MediaTag = isAudio ? "audio" : "video";
 
     return (
-        <>
-            <style>{`
-                body {
-                    margin: 0;
-                    background-color: black;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    min-height: 100vh;
-                    overflow: hidden;
-                }
-                video,
-                audio {
-                    max-width: 100vw;
-                    max-height: 100vh;
-                    outline: none;
-                }
-                .fallback-message {
-                    color: white;
-                    text-align: center;
-                    padding: 20px;
-                }
-            `}</style>
-            <MediaTag
-                ref={mediaRef}
-                controls
-                autoPlay
-                className="max-w-full max-h-full"
-                onError={e => {
-                    console.error("Media playback error:", e);
-                }}
-            >
-                <source src={url} type={ifType} />
-                <p className="fallback-message">Your browser does not support playback.</p>
+        <div className="media-player-container">
+            <MediaTag controls={controls} autoPlay={autoPlay} className="max-w-full max-h-full">
+                <source src={src} type={type} />
+                Your browser does not support {MediaTag} playback.
             </MediaTag>
-        </>
+        </div>
     );
-}
+};
+
+MediaPlayer.propTypes = {
+    src: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+    filename: PropTypes.string,
+    autoPlay: PropTypes.bool,
+    controls: PropTypes.bool
+};
 
 export default MediaPlayer;
