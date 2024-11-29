@@ -59,7 +59,7 @@ export function getMimeType(url, forceAudio = false) {
         wav: "audio/wav",
         ogg: forceAudio ? "audio/ogg" : "video/ogg",
         flac: "audio/flac",
-        mp3: "audio/mpeg",
+        mp3: "audio/mpeg"
     };
     return mimeTypes[extension] || (forceAudio ? "audio/mpeg" : "application/octet-stream");
 }

@@ -1,6 +1,5 @@
 import { isValidUrl, hasValidExtension, sanitizeUrl, getMimeType } from "@/utils/validation";
 
-
 export const config = {
     api: {
         externalResolver: true,
