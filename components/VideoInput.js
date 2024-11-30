@@ -14,23 +14,24 @@ export default function VideoInput() {
 
     // Generates the embed URL
     const generateEmbedUrl = (video, thumbnail, forceAudio) => {
-        // Sanitize and validate video URL
         const sanitizedVideoUrl = sanitizeUrl(video);
         if (!isValidUrl(sanitizedVideoUrl) || !hasValidExtension(sanitizedVideoUrl)) {
             return "Invalid video URL. Please ensure it includes a valid extension and protocol.";
         }
 
-        // Sanitize and validate thumbnail URL if provided
         const sanitizedThumbnailUrl = thumbnail ? sanitizeUrl(thumbnail) : null;
         if (sanitizedThumbnailUrl && !isValidUrl(sanitizedThumbnailUrl)) {
             return "Invalid thumbnail URL. Ensure it starts with 'http://' or 'https://'.";
         }
 
-        const url = new URL(`${siteUrl}/${sanitizedVideoUrl}`);
-        if (forceAudio) url.searchParams.set("a", "audio");
-        if (sanitizedThumbnailUrl) url.searchParams.set("i", sanitizedThumbnailUrl);
+        let url = `${siteUrl}/${sanitizedVideoUrl}`;
+        const params = [];
+        if (forceAudio) params.push("a=audio");
+        if (sanitizedThumbnailUrl) params.push(`i=${sanitizedThumbnailUrl}`);
 
-        return url.toString();
+        if (params.length) url += `?${params.join("&")}`;
+
+        return url;
     };
 
     // Updates parameters and embed URL
