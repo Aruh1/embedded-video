@@ -1,129 +1,142 @@
 import { useState } from "react";
-import { ClipboardIcon } from "lucide-react";
+import { ClipboardIcon, ImageIcon } from "lucide-react";
 import { siteUrl } from "@/utils/config";
-import PreviewMedia from "./PreviewMedia.js";
-import Footer from "./Footer.js";
+import PreviewMedia from "./PreviewMedia";
+import Footer from "./Footer";
+import { isValidUrl, hasValidExtension, sanitizeUrl } from "@/utils/validation";
 
 export default function VideoInput() {
     const [videoUrl, setVideoUrl] = useState("");
+    const [thumbnailUrl, setThumbnailUrl] = useState("");
     const [embedUrl, setEmbedUrl] = useState(siteUrl);
-    const [copyText, setCopyText] = useState("Click to copy");
-    const [hasError, setHasError] = useState(false);
+    const [copyText, setCopyText] = useState("Copy Embed Link");
     const [isAudio, setIsAudio] = useState(false);
 
-    const updateLink = (url, forceAudio = false) => {
-        try {
-            if (url) {
-                const decodedUrl = decodeURIComponent(url);
-
-                let fixedUrl = decodedUrl;
-                if (fixedUrl.startsWith("http:/") && !fixedUrl.startsWith("http://")) {
-                    fixedUrl = fixedUrl.replace("http:/", "http://");
-                }
-                if (fixedUrl.startsWith("https:/") && !fixedUrl.startsWith("https://")) {
-                    fixedUrl = fixedUrl.replace("https:/", "https://");
-                }
-
-                new URL(fixedUrl);
-
-                setVideoUrl(fixedUrl);
-
-                const embedUrlWithParams = new URL(`${siteUrl}/${decodeURIComponent(fixedUrl)}`);
-                if (forceAudio) {
-                    embedUrlWithParams.searchParams.set("a", "audio");
-                }
-
-                setEmbedUrl(embedUrlWithParams.toString());
-                setIsAudio(forceAudio);
-                setHasError(false);
-            } else {
-                setEmbedUrl(siteUrl);
-                setHasError(false);
-            }
-        } catch (e) {
-            setHasError(true);
-            setEmbedUrl(siteUrl);
+    // Generates the embed URL
+    const generateEmbedUrl = (video, thumbnail, forceAudio) => {
+        // Sanitize and validate video URL
+        const sanitizedVideoUrl = sanitizeUrl(video);
+        if (!isValidUrl(sanitizedVideoUrl) || !hasValidExtension(sanitizedVideoUrl)) {
+            return "Invalid video URL. Please ensure it includes a valid extension and protocol.";
         }
+
+        // Sanitize and validate thumbnail URL if provided
+        const sanitizedThumbnailUrl = thumbnail ? sanitizeUrl(thumbnail) : null;
+        if (sanitizedThumbnailUrl && !isValidUrl(sanitizedThumbnailUrl)) {
+            return "Invalid thumbnail URL. Ensure it starts with 'http://' or 'https://'.";
+        }
+
+        const url = new URL(`${siteUrl}/${sanitizedVideoUrl}`);
+        if (forceAudio) url.searchParams.set("a", "audio");
+        if (sanitizedThumbnailUrl) url.searchParams.set("i", sanitizedThumbnailUrl);
+
+        return url.toString();
     };
 
+    // Updates parameters and embed URL
+    const updateParameters = (newVideoUrl, newThumbnailUrl = thumbnailUrl, newIsAudio = isAudio) => {
+        const updatedEmbedUrl = generateEmbedUrl(newVideoUrl, newThumbnailUrl, newIsAudio);
+        setVideoUrl(newVideoUrl);
+        setThumbnailUrl(newThumbnailUrl);
+        setIsAudio(newIsAudio);
+        setEmbedUrl(updatedEmbedUrl);
+    };
+
+    // Copies embed URL to clipboard
     const copyToClipboard = async () => {
         try {
             await navigator.clipboard.writeText(embedUrl);
             setCopyText("Copied!");
-            setTimeout(() => setCopyText("Click to copy"), 2000);
-        } catch (err) {
-            console.error("Failed to copy:", err);
-            alert("Failed to copy to clipboard");
+            setTimeout(() => setCopyText("Copy Embed Link"), 2000);
+        } catch {
+            alert("Failed to copy embed link.");
         }
     };
 
+    // Pastes video URL from clipboard
     const pasteFromClipboard = async () => {
         try {
-            const text = await navigator.clipboard.readText();
-            updateLink(text);
-        } catch (err) {
-            console.error("Failed to paste:", err);
-            alert("Failed to paste from clipboard");
+            const clipboardText = await navigator.clipboard.readText();
+            updateParameters(clipboardText);
+        } catch {
+            alert("Failed to paste URL.");
         }
     };
 
     return (
-        <div className="text-center space-y-6 p-4 max-w-2xl w-full">
-            <div className="relative w-full max-w-xl mx-auto">
+        <div className="container mx-auto max-w-2xl px-4 py-8 space-y-6">
+            {/* Video URL Input */}
+            <div className="relative">
                 <input
                     type="url"
                     value={videoUrl}
-                    onChange={e => updateLink(e.target.value)}
-                    placeholder="Enter direct video link (MP4, WebM, MOV, etc.)"
-                    className={`w-full px-4 py-2 bg-gray-800 border rounded-full text-white
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500
-                    transition-all duration-200 ${hasError ? "border-red-500" : "border-gray-600"}`}
-                    autoComplete="off"
-                    spellCheck="false"
+                    onChange={e => updateParameters(e.target.value, thumbnailUrl, isAudio)}
+                    placeholder="Enter direct media URL (MP4, WebM, MOV, etc)"
+                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white 
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 
+                    placeholder-gray-500 transition-all duration-200"
                 />
                 <button
                     onClick={pasteFromClipboard}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 
+                    text-gray-400 hover:text-white transition"
                 >
                     <ClipboardIcon className="w-5 h-5" />
                 </button>
             </div>
 
-            {hasError && <p className="text-red-500">Invalid URL format.</p>}
-
-            <div className="space-y-2">
-                <p
-                    onClick={copyToClipboard}
-                    className="cursor-pointer text-gray-500 hover:text-gray-300 transition-colors break-all"
-                >
-                    {embedUrl}
-                </p>
-                <p className="text-sm text-gray-600">{copyText}</p>
+            {/* Thumbnail URL Input */}
+            <div className="relative">
+                <input
+                    type="url"
+                    value={thumbnailUrl}
+                    onChange={e => updateParameters(videoUrl, e.target.value, isAudio)}
+                    placeholder="Optional: Thumbnail URL"
+                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white 
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 
+                    placeholder-gray-500 transition-all duration-200"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex space-x-2">
+                    <ImageIcon className="w-5 h-5 text-gray-400" />
+                </div>
             </div>
 
-            {/* Improved Audio Force Toggle */}
-            <div className="flex items-center justify-center space-x-4">
-                <label htmlFor="forceAudio" className="flex items-center cursor-pointer">
+            {/* Embed Link Section */}
+            <div className="bg-gray-900 p-4 rounded-lg">
+                <div
+                    onClick={copyToClipboard}
+                    className="break-all text-sm text-gray-300 cursor-pointer 
+                    hover:text-white transition-colors p-2 bg-gray-800 rounded"
+                >
+                    {embedUrl}
+                </div>
+                <div className="text-center mt-2">
+                    <span className="text-xs text-gray-500">{copyText}</span>
+                </div>
+            </div>
+
+            {/* Audio Toggle */}
+            <div className="flex justify-center items-center space-x-3">
+                <label className="flex items-center cursor-pointer">
                     <div className="relative">
                         <input
                             type="checkbox"
-                            id="forceAudio"
                             checked={isAudio}
-                            onChange={e => updateLink(videoUrl, e.target.checked)}
+                            onChange={e => updateParameters(videoUrl, thumbnailUrl, e.target.checked)}
                             className="sr-only"
                         />
-                        <div className="block w-10 h-6 bg-gray-600 rounded-full"></div>
+                        <div className={`w-10 h-6 ${isAudio ? "bg-blue-600" : "bg-gray-600"} rounded-full`}></div>
                         <div
-                            className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition ${
-                                isAudio ? "translate-x-4" : ""
-                            }`}
+                            className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full 
+                            transition ${isAudio ? "transform translate-x-4" : ""}`}
                         ></div>
                     </div>
                     <span className="ml-3 text-gray-400">Force Audio Playback</span>
                 </label>
             </div>
-            {/* Improved Preview Media */}
-            <PreviewMedia url={videoUrl} forceAudio={isAudio} />
+
+            {/* Media Preview */}
+            <PreviewMedia url={videoUrl} forceAudio={isAudio} thumbnailUrl={thumbnailUrl} />
             <Footer />
         </div>
     );

@@ -2,14 +2,15 @@ import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { isValidUrl, hasValidExtension, hasValidProtocol, sanitizeUrl, getMimeType } from "@/utils/validation";
 
-export function PreviewMedia({ url, forceAudio = false }) {
+export function PreviewMedia({ url, forceAudio = false, thumbnailUrl = "" }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isValid, setIsValid] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const mediaRef = useRef(null);
+    const [validatedThumbnailUrl, setValidatedThumbnailUrl] = useState("");
 
+    // URL Validation for Video
     useEffect(() => {
-        // Validate URL
         const validateUrl = () => {
             // Skip validation if URL is empty
             if (!url) {
@@ -47,6 +48,31 @@ export function PreviewMedia({ url, forceAudio = false }) {
 
         validateUrl();
     }, [url]);
+
+    // Thumbnail URL Validation
+    useEffect(() => {
+        const validateThumbnailUrl = () => {
+            if (!thumbnailUrl) {
+                setValidatedThumbnailUrl("");
+                return;
+            }
+
+            try {
+                const sanitizedUrl = sanitizeUrl(thumbnailUrl);
+                const validatedUrl = isValidUrl(sanitizedUrl);
+
+                if (validatedUrl && hasValidProtocol(validatedUrl)) {
+                    setValidatedThumbnailUrl(sanitizedUrl);
+                } else {
+                    setValidatedThumbnailUrl("");
+                }
+            } catch {
+                setValidatedThumbnailUrl("");
+            }
+        };
+
+        validateThumbnailUrl();
+    }, [thumbnailUrl]);
 
     // Determine media type
     const mediaType = isValid ? getMimeType(url, forceAudio) : "";
@@ -87,9 +113,13 @@ export function PreviewMedia({ url, forceAudio = false }) {
                 preload="metadata"
                 type={mediaType}
                 controls
+                poster={validatedThumbnailUrl}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
             />
+            {validatedThumbnailUrl && (
+                <div className="mt-2 text-sm text-gray-500 text-center">Thumbnail: {validatedThumbnailUrl}</div>
+            )}
         </div>
     );
 }
@@ -97,13 +127,15 @@ export function PreviewMedia({ url, forceAudio = false }) {
 // PropTypes for type checking
 PreviewMedia.propTypes = {
     url: PropTypes.string,
-    forceAudio: PropTypes.bool
+    forceAudio: PropTypes.bool,
+    thumbnailUrl: PropTypes.string
 };
 
 // Default props
 PreviewMedia.defaultProps = {
     url: "",
-    forceAudio: false
+    forceAudio: false,
+    thumbnailUrl: ""
 };
 
 export default PreviewMedia;
