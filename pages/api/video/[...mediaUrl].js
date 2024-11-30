@@ -11,24 +11,25 @@ export default async function handler(req, res) {
     try {
         // Extract raw URL
         const rawUrl = req.url;
-        let mediaUrl = rawUrl.replace(/^\/api\/video\//, "").replace(/^\//, "");
+        let mediaUrl = decodeURIComponent(rawUrl.replace(/^\/api\/video\//, "").replace(/^\//, ""));
 
-        // Parse the URL to extract query parameters
         const parsedUrl = new URL(mediaUrl, "https://dummy.com");
+
+        // Ambil dan sanitasi parameter query
         const forceAudio = parsedUrl.searchParams.get("a") === "audio";
-        const thumbnailUrl = parsedUrl.searchParams.get("i");
+        const rawThumbnailUrl = parsedUrl.searchParams.get("i");
         const thumbnailWidth = parsedUrl.searchParams.get("w") || "1920";
         const thumbnailHeight = parsedUrl.searchParams.get("h") || "1080";
 
-        // Clean up query parameters
+        // Bersihkan parameter query dari media URL
         parsedUrl.searchParams.delete("a");
         parsedUrl.searchParams.delete("i");
         parsedUrl.searchParams.delete("w");
         parsedUrl.searchParams.delete("h");
 
-        mediaUrl = parsedUrl.pathname.substring(1) + parsedUrl.search;
+        mediaUrl = decodeURIComponent(parsedUrl.pathname.substring(1) + parsedUrl.search);
 
-        // Validate and sanitize media URL
+        // Validasi dan sanitasi media URL
         const validatedUrl = isValidUrl(mediaUrl);
         if (!validatedUrl) {
             return res.status(400).json({
@@ -50,8 +51,7 @@ export default async function handler(req, res) {
         const isAudio = forceAudio || mimeType.startsWith("audio");
         const MediaTag = isAudio ? "audio" : "video";
 
-        // Validate thumbnail URL if provided
-        const sanitizedThumbnailUrl = thumbnailUrl ? sanitizeUrl(thumbnailUrl) : null;
+        const sanitizedThumbnailUrl = rawThumbnailUrl ? decodeURIComponent(sanitizeUrl(rawThumbnailUrl)) : null;
 
         // Generate HTML response
         const html = `
