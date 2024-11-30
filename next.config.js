@@ -1,4 +1,7 @@
 module.exports = {
+    experimental: {
+        serverComponentsExternalPackages: ["formidable"]
+    },
     async rewrites() {
         return [
             {

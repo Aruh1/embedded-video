@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { ClipboardIcon, ImageIcon } from "lucide-react";
+import { ClipboardIcon, ImageIcon, UploadIcon } from "lucide-react";
 import { siteUrl } from "@/utils/config";
 import PreviewMedia from "./PreviewMedia";
 import Footer from "./Footer";
-import { isValidUrl, hasValidExtension, sanitizeUrl } from "@/utils/validation";
+import { VALID_EXTENSIONS, isValidUrl, hasValidExtension, sanitizeUrl, getMimeType } from "@/utils/validation";
 
 export default function VideoInput() {
     const [videoUrl, setVideoUrl] = useState("");
@@ -11,6 +11,7 @@ export default function VideoInput() {
     const [embedUrl, setEmbedUrl] = useState(siteUrl);
     const [copyText, setCopyText] = useState("Copy Embed Link");
     const [isAudio, setIsAudio] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
     // Generates the embed URL
     const generateEmbedUrl = (video, thumbnail, forceAudio) => {
@@ -64,6 +65,68 @@ export default function VideoInput() {
         }
     };
 
+    const handleFileUpload = async (file, type) => {
+        if (!file) return;
+
+        console.log("File details:", {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified
+        });
+
+        // Validate file size
+        const maxSize = 200 * 1024 * 1024; // 200MB
+        if (file.size > maxSize) {
+            console.error("File size too large");
+            alert("File size too large (max 200MB)");
+            return;
+        }
+
+        // Get file extension
+        const fileName = file.name.toLowerCase();
+        const fileExtension = fileName.split(".").pop();
+
+        console.log("File extension:", fileExtension);
+
+        // Upload process
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            console.log("Starting upload...");
+            const response = await fetch("/api/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            console.log("Response status:", response.status);
+            const data = await response.json();
+            console.log("Response data:", data);
+
+            if (!response.ok) {
+                throw new Error(data.error || `Upload failed for ${type}`);
+            }
+
+            // Update URL
+            if (type === "video") {
+                updateParameters(data.url, thumbnailUrl, isAudio);
+            } else if (type === "thumbnail") {
+                updateParameters(videoUrl, data.url, isAudio);
+            }
+        } catch (error) {
+            console.error("Full upload error:", error);
+            alert(error.message || `Failed to upload ${type} file`);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const LoadingSpinner = () => (
+        <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-white" />
+    );
+
     return (
         <div className="container mx-auto max-w-2xl px-4 py-8 space-y-6">
             {/* Video URL Input */}
@@ -77,13 +140,25 @@ export default function VideoInput() {
                     focus:outline-none focus:ring-2 focus:ring-blue-500 
                     placeholder-gray-500 transition-all duration-200"
                 />
-                <button
-                    onClick={pasteFromClipboard}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 
-                    text-gray-400 hover:text-white transition"
-                >
-                    <ClipboardIcon className="w-5 h-5" />
-                </button>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex space-x-2">
+                    <button onClick={pasteFromClipboard} className="text-gray-400 hover:text-white transition">
+                        <ClipboardIcon className="w-5 h-5" />
+                    </button>
+                    <label className="cursor-pointer">
+                        <input
+                            type="file"
+                            className="hidden"
+                            accept="video/*"
+                            onChange={e => handleFileUpload(e.target.files[0], "video")}
+                            disabled={isUploading}
+                        />
+                        {isUploading ? (
+                            <LoadingSpinner />
+                        ) : (
+                            <UploadIcon className="w-5 h-5 text-gray-400 hover:text-white transition" />
+                        )}
+                    </label>
+                </div>
             </div>
 
             {/* Thumbnail URL Input */}
@@ -99,6 +174,20 @@ export default function VideoInput() {
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex space-x-2">
                     <ImageIcon className="w-5 h-5 text-gray-400" />
+                    <label className="cursor-pointer">
+                        <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={e => handleFileUpload(e.target.files[0], "thumbnail")}
+                            disabled={isUploading}
+                        />
+                        {isUploading ? (
+                            <LoadingSpinner />
+                        ) : (
+                            <UploadIcon className="w-5 h-5 text-gray-400 hover:text-white transition" />
+                        )}
+                    </label>
                 </div>
             </div>
 

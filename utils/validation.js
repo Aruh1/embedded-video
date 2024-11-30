@@ -12,7 +12,12 @@ export const VALID_EXTENSIONS = [
     ".mp3",
     ".wav",
     ".ogg",
-    ".flac"
+    ".flac",
+    ".gif",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp"
 ];
 export const ALLOWED_PROTOCOLS = ["https://", "http://"];
 
@@ -59,7 +64,12 @@ export function getMimeType(url, forceAudio = false) {
         wav: "audio/wav",
         ogg: forceAudio ? "audio/ogg" : "video/ogg",
         flac: "audio/flac",
-        mp3: "audio/mpeg"
+        mp3: "audio/mpeg",
+        gif: "image/gif",
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        webp: "image/webp"
     };
     return mimeTypes[extension] || (forceAudio ? "audio/mpeg" : "application/octet-stream");
 }
