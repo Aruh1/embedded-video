@@ -12,28 +12,17 @@ export default async function handler(req, res) {
         const rawUrl = req.url;
         let mediaUrl = rawUrl.replace(/^\/api\/video\//, "").replace(/^\//, "");
 
-        // Parse the URL to handle existing query parameters
         const parsedUrl = new URL(mediaUrl, "https://dummy.com");
         const forceAudio = parsedUrl.searchParams.get("a") === "audio";
 
-        // Reconstruct the original URL without our custom parameter
         parsedUrl.searchParams.delete("a");
         mediaUrl = parsedUrl.pathname.substring(1) + parsedUrl.search;
 
-        // Validate and fix URL
         const validatedUrl = isValidUrl(mediaUrl);
         if (!validatedUrl) {
             return res.status(400).json({
                 error: "Invalid URL format.",
                 receivedUrl: mediaUrl
-            });
-        }
-
-        // Skip file extension check for forced audio
-        if (!forceAudio && !hasValidExtension(validatedUrl)) {
-            return res.status(400).json({
-                error: "Invalid file type. Supported types: MP4, WebM, MOV, etc.",
-                receivedUrl: validatedUrl
             });
         }
 
@@ -49,34 +38,93 @@ export default async function handler(req, res) {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta property="og:type" content="video.other">
+        
+        <!-- Open Graph Metadata -->
+        <meta property="og:type" content="${isAudio ? "music.song" : "video.other"}">
+        <meta property="og:url" content="${sanitizedUrl}">
+        <meta id="og-width" property="og:video:width" content="">
+        <meta id="og-height" property="og:video:height" content="">
         <meta property="og:video:url" content="${sanitizedUrl}">
-        <meta property="og:video:width" content="1920">
-        <meta property="og:video:height" content="1080">
+        <meta property="og:video:secure_url" content="${sanitizedUrl}">
+        <meta property="og:video:type" content="${mimeType}">
+        
+        <!-- Twitter Card Metadata -->
+        <meta name="twitter:card" content="${isAudio ? "audio" : "player"}">
+        <meta name="twitter:player:stream" content="${sanitizedUrl}">
+        <meta name="twitter:player" content="${sanitizedUrl}">
+        <meta id="twitter-width" name="twitter:player:width" content="">
+        <meta id="twitter-height" name="twitter:player:height" content="">
+        
         <title>${isAudio ? "Audio" : "Video"} Player - ${filename}</title>
-        <link rel="shortcut icon" href="https://ptpimg.me/animated_favicon.gif">
         <style>
-          body {
-            margin: 0;
-            background-color: black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
+          body { 
+            margin: 0; 
+            background: black; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
           }
-          video, audio {
-            max-width: 100vw;
-            max-height: 100vh;
-            outline: none;
+          ${MediaTag} { 
+            max-width: 100%; 
+            max-height: 100vh; 
           }
         </style>
       </head>
       <body>
-        <${MediaTag} controls="true" autoPlay="true" className="max-w-full max-h-full">
+        <${MediaTag} 
+          id="media-player" 
+          controls 
+          autoplay 
+          style="display:none;"
+        >
           <source src="${sanitizedUrl}" type="${mimeType}" />
-          Your browser does not support ${MediaTag} playback.
+          Your browser does not support media playback.
         </${MediaTag}>
+
+        <script>
+          const mediaPlayer = document.getElementById('media-player');
+          
+          mediaPlayer.addEventListener('loadedmetadata', function() {
+            // Show the media player
+            mediaPlayer.style.display = 'block';
+            
+            // Dynamic resolution detection
+            let width, height;
+            if (mediaPlayer.videoWidth && mediaPlayer.videoHeight) {
+              width = mediaPlayer.videoWidth;
+              height = mediaPlayer.videoHeight;
+            } else {
+              // Fallback to standard HD if detection fails
+              width = 1920;
+              height = 1080;
+            }
+
+            // Update Twitter Card metadata dynamically
+            document.getElementById('twitter-width').setAttribute('content', width.toString());
+            document.getElementById('twitter-height').setAttribute('content', height.toString());
+
+            // Update Open Graph metadata dynamically
+            document.getElementById('og-width').setAttribute('content', width.toString());
+            document.getElementById('og-height').setAttribute('content', height.toString());
+
+            // Optional: Additional logging or tracking
+            console.log('Detected Resolution:', width + 'x' + height);
+          });
+
+          // Error handling
+          mediaPlayer.addEventListener('error', function(e) {
+            console.error('Media load error:', e);
+            // Fallback metadata
+            const fallbackWidth = '1920';
+            const fallbackHeight = '1080';
+
+            document.getElementById('twitter-width').setAttribute('content', fallbackWidth);
+            document.getElementById('twitter-height').setAttribute('content', fallbackHeight);
+            document.getElementById('og-width').setAttribute('content', fallbackWidth);
+            document.getElementById('og-height').setAttribute('content', fallbackHeight);
+          });
+        </script>
       </body>
       </html>
     `;
