@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const uploadDir = path.join(process.cwd(), "uploads");
+    const uploadDir = path.join(process.cwd(), 'tmp');
     try {
         await fs.mkdir(uploadDir, { recursive: true });
     } catch (err) {
