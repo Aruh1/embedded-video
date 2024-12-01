@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ClipboardIcon, ImageIcon, UploadIcon } from "lucide-react";
+import { ClipboardIcon, ImageIcon } from "lucide-react";
 import { siteUrl } from "@/utils/config";
 import PreviewMedia from "./PreviewMedia";
 import Footer from "./Footer";
-import { isValidUrl, hasValidExtension, sanitizeUrl, getMimeType } from "@/utils/validation";
+import FileUpload from "./FileUpload";
+import { isValidUrl, hasValidExtension, sanitizeUrl } from "@/utils/validation";
 
 export default function VideoInput() {
     const [videoUrl, setVideoUrl] = useState("");
@@ -11,9 +12,8 @@ export default function VideoInput() {
     const [embedUrl, setEmbedUrl] = useState(siteUrl);
     const [copyText, setCopyText] = useState("Copy Embed Link");
     const [isAudio, setIsAudio] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
 
-    // Generates the embed URL
+    // Generates the embed URL (same as before)
     const generateEmbedUrl = (video, thumbnail, forceAudio) => {
         const sanitizedVideoUrl = sanitizeUrl(video);
         if (!isValidUrl(sanitizedVideoUrl) || !hasValidExtension(sanitizedVideoUrl)) {
@@ -65,62 +65,6 @@ export default function VideoInput() {
         }
     };
 
-    const handleFileUpload = async (file, type) => {
-        if (!file) return;
-
-        console.log("File details:", {
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            lastModified: file.lastModified
-        });
-
-        // Validate file size
-        const maxSize = 200 * 1024 * 1024; // 200MB
-        if (file.size > maxSize) {
-            console.error("File size too large");
-            alert("File size too large (max 200MB)");
-            return;
-        }
-
-        setIsUploading(true);
-        try {
-            const formData = new FormData();
-            formData.append("reqtype", "fileupload");
-            formData.append("userhash", process.env.NEXT_PUBLIC_CATBOX_USER_HASH || "");
-            formData.append("fileToUpload", file);
-
-            const response = await fetch("https://cat.pololer.web.id/user/api.php", {
-                method: "POST",
-                body: formData
-            });
-
-            const responseText = await response.text();
-
-            if (!response.ok || !responseText.startsWith("https://")) {
-                throw new Error(responseText || `Upload failed for ${type}`);
-            }
-
-            const uploadedUrl = responseText.trim();
-
-            // Update URL based on upload type
-            if (type === "video") {
-                updateParameters(uploadedUrl, thumbnailUrl, isAudio);
-            } else if (type === "thumbnail") {
-                updateParameters(videoUrl, uploadedUrl, isAudio);
-            }
-        } catch (error) {
-            console.error("Upload error:", error);
-            alert(error.message || `Failed to upload ${type} file`);
-        } finally {
-            setIsUploading(false);
-        }
-    };
-
-    const LoadingSpinner = () => (
-        <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-white" />
-    );
-
     return (
         <div className="container mx-auto max-w-2xl px-4 py-8 space-y-6">
             {/* Video URL Input */}
@@ -138,20 +82,7 @@ export default function VideoInput() {
                     <button onClick={pasteFromClipboard} className="text-gray-400 hover:text-white transition">
                         <ClipboardIcon className="w-5 h-5" />
                     </button>
-                    <label className="cursor-pointer">
-                        <input
-                            type="file"
-                            className="hidden"
-                            accept="video/*"
-                            onChange={e => handleFileUpload(e.target.files[0], "video")}
-                            disabled={isUploading}
-                        />
-                        {isUploading ? (
-                            <LoadingSpinner />
-                        ) : (
-                            <UploadIcon className="w-5 h-5 text-gray-400 hover:text-white transition" />
-                        )}
-                    </label>
+                    <FileUpload type="video" onUpload={url => updateParameters(url)} />
                 </div>
             </div>
 
@@ -168,20 +99,7 @@ export default function VideoInput() {
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex space-x-2">
                     <ImageIcon className="w-5 h-5 text-gray-400" />
-                    <label className="cursor-pointer">
-                        <input
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={e => handleFileUpload(e.target.files[0], "thumbnail")}
-                            disabled={isUploading}
-                        />
-                        {isUploading ? (
-                            <LoadingSpinner />
-                        ) : (
-                            <UploadIcon className="w-5 h-5 text-gray-400 hover:text-white transition" />
-                        )}
-                    </label>
+                    <FileUpload type="thumbnail" onUpload={url => updateParameters(videoUrl, url)} />
                 </div>
             </div>
 
