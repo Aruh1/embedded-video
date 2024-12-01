@@ -3,7 +3,7 @@ import { ClipboardIcon, ImageIcon, UploadIcon } from "lucide-react";
 import { siteUrl } from "@/utils/config";
 import PreviewMedia from "./PreviewMedia";
 import Footer from "./Footer";
-import { VALID_EXTENSIONS, isValidUrl, hasValidExtension, sanitizeUrl, getMimeType } from "@/utils/validation";
+import { isValidUrl, hasValidExtension, sanitizeUrl, getMimeType } from "@/utils/validation";
 
 export default function VideoInput() {
     const [videoUrl, setVideoUrl] = useState("");
@@ -83,40 +83,34 @@ export default function VideoInput() {
             return;
         }
 
-        // Get file extension
-        const fileName = file.name.toLowerCase();
-        const fileExtension = fileName.split(".").pop();
-
-        console.log("File extension:", fileExtension);
-
-        // Upload process
         setIsUploading(true);
-        const formData = new FormData();
-        formData.append("file", file);
-
         try {
-            console.log("Starting upload...");
-            const response = await fetch("/api/upload", {
+            const formData = new FormData();
+            formData.append("reqtype", "fileupload");
+            formData.append("userhash", process.env.NEXT_PUBLIC_CATBOX_USER_HASH || "");
+            formData.append("fileToUpload", file);
+
+            const response = await fetch("https://cat.pololer.web.id/user/api.php", {
                 method: "POST",
                 body: formData
             });
 
-            console.log("Response status:", response.status);
-            const data = await response.json();
-            console.log("Response data:", data);
+            const responseText = await response.text();
 
-            if (!response.ok) {
-                throw new Error(data.error || `Upload failed for ${type}`);
+            if (!response.ok || !responseText.startsWith("https://")) {
+                throw new Error(responseText || `Upload failed for ${type}`);
             }
 
-            // Update URL
+            const uploadedUrl = responseText.trim();
+
+            // Update URL based on upload type
             if (type === "video") {
-                updateParameters(data.url, thumbnailUrl, isAudio);
+                updateParameters(uploadedUrl, thumbnailUrl, isAudio);
             } else if (type === "thumbnail") {
-                updateParameters(videoUrl, data.url, isAudio);
+                updateParameters(videoUrl, uploadedUrl, isAudio);
             }
         } catch (error) {
-            console.error("Full upload error:", error);
+            console.error("Upload error:", error);
             alert(error.message || `Failed to upload ${type} file`);
         } finally {
             setIsUploading(false);
