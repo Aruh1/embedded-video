@@ -11,12 +11,10 @@ export const config = {
 
 export default async function handler(req, res) {
     console.log("Received upload request");
-
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    // Create upload directory if it doesn't exist
     const uploadDir = path.join(process.cwd(), "uploads");
     try {
         await fs.mkdir(uploadDir, { recursive: true });
@@ -50,7 +48,6 @@ export default async function handler(req, res) {
 
         const file = parsedForm.files.file[0] || parsedForm.files.file;
 
-        // Validasi file
         if (!file) {
             console.error("No file uploaded");
             return res.status(400).json({ error: "No file uploaded" });
@@ -61,17 +58,17 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: "Invalid file extension" });
         }
 
-        // Tentukan MIME type
         const mimeType = getMimeType(file.originalFilename);
         console.log("Detected MIME type:", mimeType);
 
-        // File processing
-        const fileBuffer = await fs.readFile(file.filepath);
-
+        // Use native fetch and FormData
         const formData = new FormData();
         formData.append("reqtype", "fileupload");
         formData.append("userhash", process.env.CATBOX_USER_HASH || "");
-        formData.append("fileToUpload", new Blob([fileBuffer], { type: mimeType }), file.originalFilename);
+
+        // Read file as Buffer and append
+        const fileBuffer = await fs.readFile(file.filepath);
+        formData.append("fileToUpload", new File([fileBuffer], file.originalFilename, { type: mimeType }));
 
         const response = await fetch("https://cat.pololer.web.id/user/api.php", {
             method: "POST",
