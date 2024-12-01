@@ -1,6 +1,7 @@
 module.exports = {
     experimental: {
-        serverComponentsExternalPackages: ["formidable"]
+        serverExternalPackages: ["formidable"],
+        webpackMemoryOptimizations: true
     },
     async rewrites() {
         return [
