@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Coffee, Github, Icon } from "lucide-react";
 import { mugTeabag } from "@lucide/lab";
 
-const TooltipContent = ({ text }) => (
+const TooltipContent = React.memo(({ text }) => (
     <div
-        className="absolute left-1/2 ml-5 top-1/2 -translate-y-1/2 z-50
+        className="absolute z-50 left-1/2 ml-5 top-1/2 -translate-y-1/2
         opacity-0 invisible group-hover:opacity-100 group-hover:visible
         transform -translate-x-2 group-hover:translate-x-0
         transition-all duration-300 ease-out"
@@ -19,28 +19,32 @@ const TooltipContent = ({ text }) => (
             ></div>
         </div>
     </div>
-);
+));
+
+TooltipContent.displayName = "TooltipContent";
 
 export default function Footer() {
     const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
-    useEffect(() => {
-        // Set up an interval to update the current time every second
-        const interval = setInterval(() => {
-            setCurrentTime(new Date().toLocaleTimeString());
-        }, 1000);
 
-        return () => clearInterval(interval);
+    // Optimize time update with useCallback
+    const updateTime = useCallback(() => {
+        setCurrentTime(new Date().toLocaleTimeString());
     }, []);
 
+    useEffect(() => {
+        const interval = setInterval(updateTime, 1000);
+        return () => clearInterval(interval);
+    }, [updateTime]);
+
     return (
-        <footer className="fixed bottom-0 left-0 right-0 p-4 bg-gray-900/80 backdrop-blur-sm border-t border-gray-800 animate-fadeIn">
-            <div className="container mx-auto flex flex-col md:flex-row items-center justify-between text-gray-400 text-sm gap-4">
-                <div className="flex items-center space-x-4 animate-slideInLeft">
+        <footer className="fixed bottom-0 left-0 right-0 p-2 sm:p-4 bg-gray-900/80 backdrop-blur-sm border-t border-gray-800 animate-fadeIn">
+            <div className="container mx-auto flex flex-col md:flex-row items-center justify-between text-gray-400 text-xs sm:text-sm gap-2 sm:gap-4">
+                <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 text-center sm:text-left animate-slideInLeft">
                     <span className="hover:text-gray-200 transition-colors duration-300">
                         © {new Date().getFullYear()} ‧ pololer@Yuramedia Link. All rights reserved.
                     </span>
-                    <span className="flex items-center space-x-1 hover:text-gray-200 transition-colors duration-300">
-                        Powered by
+                    <div className="flex items-center space-x-2 hover:text-gray-200 transition-colors duration-300">
+                        <span>Powered by</span>
                         <a
                             href="https://vercel.com/"
                             target="_blank"
@@ -48,7 +52,7 @@ export default function Footer() {
                             className="flex items-center"
                         >
                             <svg
-                                className="h-4 w-auto ml-1"
+                                className="h-3 sm:h-4 w-auto ml-1"
                                 viewBox="0 0 283 64"
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +63,7 @@ export default function Footer() {
                                 />
                             </svg>
                         </a>
-                    </span>
+                    </div>
                     <a
                         href="https://status.pololer.web.id/"
                         target="_blank"
@@ -69,15 +73,16 @@ export default function Footer() {
                         <Image
                             src="https://uptime.betterstack.com/status-badges/v1/monitor/1ogdv.svg"
                             alt="Uptime Status"
-                            height={4}
+                            height={20}
                             width={65}
+                            style={{ width: "auto", height: "auto" }}
+                            priority
                         />
                     </a>
                 </div>
-                <div className="flex items-center space-x-6 animate-slideInRight">
+                <div className="flex items-center space-x-2 sm:space-x-6 animate-slideInRight">
                     <span
                         className="transition-all duration-300 transform flex items-center space-x-2"
-                        rel="noopener noreferrer"
                         suppressHydrationWarning
                     >
                         {currentTime}
@@ -90,7 +95,7 @@ export default function Footer() {
                             className="hover:text-blue-400 transition-all duration-300 transform hover:scale-110 flex items-center space-x-2 hover:animate-bounce"
                             aria-label="Support on Ko-fi"
                         >
-                            <Coffee className="w-5 h-5" />
+                            <Coffee className="w-4 h-4 sm:w-5 sm:h-5" />
                         </a>
                         <TooltipContent text="Support on Ko-fi" />
                     </div>
@@ -103,7 +108,7 @@ export default function Footer() {
                             className="hover:text-orange-400 transition-all duration-300 transform hover:scale-110 flex items-center space-x-2 hover:animate-bounce"
                             aria-label="Support on Trakteer"
                         >
-                            <Icon iconNode={mugTeabag} className="w-5 h-5" />
+                            <Icon iconNode={mugTeabag} className="w-4 h-4 sm:w-5 sm:h-5" />
                         </a>
                         <TooltipContent text="Dukung Saya di Trakteer" />
                     </div>
@@ -116,7 +121,7 @@ export default function Footer() {
                             className="hover:text-gray-200 transition-all duration-300 transform hover:scale-110 flex items-center space-x-2 hover:animate-bounce"
                             aria-label="View source on GitHub"
                         >
-                            <Github className="w-5 h-5" />
+                            <Github className="w-4 h-4 sm:w-5 sm:h-5" />
                         </a>
                         <TooltipContent text="View on GitHub" />
                     </div>
