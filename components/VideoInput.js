@@ -99,7 +99,7 @@ export default function VideoInput() {
                         >
                             <ClipboardIcon className="w-5 h-5" />
                         </button>
-                        <FileUpload type="video" onUpload={updateParameters} />
+                        <FileUpload type="video" onUpload={url => updateParameters(url, thumbnailUrl)} />
                     </div>
                 </div>
 
