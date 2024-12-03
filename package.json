@@ -14,7 +14,7 @@
         "@lucide/lab": "^0.1.2",
         "@vercel/analytics": "^1.4.1",
         "formidable": "^3.5.2",
-        "lucide-react": "^0.462.0",
+        "lucide-react": "^0.464.0",
         "next": "15.0.3",
         "node-fetch": "^3.3.2",
         "prop-types": "^15.8.1",
