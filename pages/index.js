@@ -2,6 +2,7 @@ import Head from "next/head";
 import VideoInput from "@/components/VideoInput";
 import { MonitorPlay } from "lucide-react";
 import { siteUrl } from "@/utils/config";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function Home() {
     return (
@@ -10,7 +11,7 @@ export default function Home() {
                 <title>Embedded Video</title>
                 <meta name="description" content="Embed large video files on Discord" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <link rel="shortcut icon" type="image/x-icon" href="https://ptpimg.me/animated_favicon.gif" />
+                <link rel="icon" type="image/x-icon" href="/animated_favicon.gif" />
                 <meta property="og:site_name" content="Embedded Video"></meta>
                 <meta property="og:title" content="Embedded Video" />
                 <meta property="og:description" content="Embed large video files on Discord" />
@@ -21,6 +22,7 @@ export default function Home() {
                 ></meta>
                 <meta name="theme-color" content="#23272A"></meta>
                 <meta property="og:url" content={siteUrl} />
+                <Analytics />
             </Head>
             <main className="bg-black flex items-center justify-center min-h-screen text-white">
                 <div className="text-center space-y-6 p-4 max-w-2xl w-full">
