@@ -37,11 +37,11 @@ export default function Footer() {
     }, [updateTime]);
 
     return (
-        <footer className="fixed bottom-0 left-0 right-0 p-2 sm:p-4 bg-gray-900/80 backdrop-blur-sm border-t border-gray-800 animate-fadeIn">
+        <footer className="fixed bottom-0 left-0 right-0 p-2 sm:p-4 bg-gray-900/80 backdrop-blur-xs border-t border-gray-800 animate-fadeIn">
             <div className="container mx-auto flex flex-col md:flex-row items-center justify-between text-gray-400 text-xs sm:text-sm gap-2 sm:gap-4">
                 <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 text-center sm:text-left animate-slideInLeft">
                     <span className="hover:text-gray-200 transition-colors duration-300">
-                        © {new Date().getFullYear()} ‧ pololer@Yuramedia Link. All rights reserved.
+                        © {new Date().getFullYear()} ‧ pololer-project. All rights reserved.
                     </span>
                     <div className="flex items-center space-x-2 hover:text-gray-200 transition-colors duration-300">
                         <span>Powered by</span>

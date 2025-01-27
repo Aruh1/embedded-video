@@ -42,7 +42,7 @@ export default function VideoInput() {
             setIsAudio(newIsAudio);
             setEmbedUrl(updatedEmbedUrl);
         },
-        [generateEmbedUrl, thumbnailUrl]
+        [generateEmbedUrl, thumbnailUrl, isAudio] // Added isAudio as a dependency
     );
 
     // Clipboard interaction with error handling
@@ -72,7 +72,7 @@ export default function VideoInput() {
         () => ({
             base:
                 "w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white " +
-                "focus:outline-none focus:ring-2 focus:ring-blue-500 " +
+                "focus:outline-hidden focus:ring-2 focus:ring-blue-500 " +
                 "placeholder-gray-500 transition-all duration-200",
             container: "relative space-y-4 sm:space-y-6"
         }),

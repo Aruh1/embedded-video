@@ -1,6 +1,6 @@
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
     experimental: {
-        serverExternalPackages: ["formidable"],
         webpackMemoryOptimizations: true
     },
     async rewrites() {
@@ -11,5 +11,8 @@ module.exports = {
             }
         ];
     },
-    trailingSlash: false
+    trailingSlash: false,
+    reactStrictMode: true
 };
+
+module.exports = nextConfig;
